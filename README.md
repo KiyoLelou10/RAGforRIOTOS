@@ -27,7 +27,7 @@ A Retrieval-Augmented Generation (RAG) toolchain for the RIOT operating system. 
 * Required pip packages:
 
   ```bash
-  pip install chromadb sentence-transformers torch numpy
+  pip install all required packaged please 
   ```
 
 ---
