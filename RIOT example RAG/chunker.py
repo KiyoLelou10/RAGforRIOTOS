@@ -7,7 +7,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # === CONFIGURATION ===
 # Use the correct WSL/Linux path
-ROOT_DIR = Path("/mnt/c/Users/asums/OneDrive/Desktop/RIOT/examples")
+# Please change this path so that it matches your local path
+ROOT_DIR = Path("/mnt/c/Users/asums/OneDrive/Desktop/RIOT/examples") 
 OUT_FILE = Path("riot_examples_chunks.jsonl")
 # ~800 tokens (~2000 chars), 200-token (~500 chars) overlap
 CHUNK_SIZE   = 2000
@@ -151,4 +152,5 @@ def main():
         print("4. Directory structure different than expected")
 
 if __name__ == "__main__":
+
     main()
