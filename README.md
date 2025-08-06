@@ -1,5 +1,5 @@
 # RAGforRIOTOS
-This is a RAG Retrieval-Augmented Generation for the Operating System RIOT, it uses RIOT's documentation and also the examples directory retrieve relevant parts from code and documentation for a user query. These can be used to improve prompts to LLMs for generating RIOT code or explaining RIOT functionality
+This is a RAG Retrieval-Augmented Generation for the Operating System RIOT, it uses RIOT's documentation and also the examples directory retrieve relevant parts from code and documentation for a user query. These can be used to improve prompts to LLMs for generating RIOT code or explaining RIOT functionality. Below is a guide on how to locally build the RAG, please be sure to install all necessary dependencies.
 
 # Documentation RAG
 It is important to follow this work Flow, https://github.com/RIOT-OS/RIOT is where the RIOT lies please go ahead and clone it. First we need to create chunks from RIOT's documentation go ahead and run python3 RIOTDocuChunker2.py path/to/local/riot/repo, afterwards if you left the defaults a new json called riot_chunks.json should be generated which contains RIOT's documentation divided into overlapping chunks with some metadata. 
@@ -151,9 +151,7 @@ Please provide a comprehensive answer based on the RIOT OS documentation provide
 
 I then ran it in request.py and got this:
 
-================================================================================
-TOP 8 RESULTS FOR: 'I want to create a udp server that returns a resource using gnrc'
-================================================================================
+Top 8 results for: I want to make a udp server that returns a resource using gnrc
 
 [1] Score: 0.9133 (cosine: 0.7133, path_boost: 0.2000)
 🎯 Path keywords matched: udp, gnrc
