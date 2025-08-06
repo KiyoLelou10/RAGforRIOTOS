@@ -274,7 +274,6 @@ class RIOTRAGQuerySystem:
                 'content': document,
                 'metadata': metadata,
                 'relevance_score': score,
-                'file_path': metadata.get('file_path', ''),
                 'module': metadata.get('module', ''),
                 'category': metadata.get('category', ''),
                 'file_name': metadata.get('file_name', ''),
@@ -309,7 +308,6 @@ The following {len(chunks)} chunks were retrieved from the official RIOT OS docu
 **Module:** {chunk['module']}
 **Category:** {chunk['category']}
 **File:** {chunk['file_name']}
-**Path:** {chunk['file_path']}
 **Section:** {chunk['section']}
 
 ```
