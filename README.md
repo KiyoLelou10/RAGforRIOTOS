@@ -142,7 +142,7 @@ Perform RAG over RIOT's `examples/` codebase.
 ---
 
 ## Best of two worlds 
-If you saved all python files in one common directory (different from the stucture of the repository), you can try to run a request which searches both rags and return the combined results:
+If you saved all python files in one common directory (different from the stucture of this repository), you can try to run a request which searches both rags and returns the combined results:
 
  ```bash
    python3 RIOTRequestCombined.py "<your query>"
