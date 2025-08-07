@@ -127,6 +127,12 @@ class RIOTCompressedSearchSystem:
         if not self.model_file.exists():
             raise FileNotFoundError(f"Model file not found: {self.model_file}")
 
+        # Fix: Register the class in __main__
+        import sys
+        import __main__
+        setattr(__main__, "EmbeddingAutoencoder", EmbeddingAutoencoder)
+        sys.modules['__main__'] = __main__
+
         # Load model checkpoint
         checkpoint = torch.load(self.model_file, map_location=self.device)
 
