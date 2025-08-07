@@ -1,6 +1,7 @@
 # RAG for RIOT OS
 
-A Retrieval-Augmented Generation (RAG) toolchain for the RIOT operating system. This repository helps you build local vector search indices over RIOT's documentation and example code to power LLM-assisted development, code generation, and explanations.
+A Retrieval-Augmented Generation (RAG) toolchain for the [RIOT operating system](https://github.com/RIOT-OS/RIOT). This repository helps you build local vector search indices over RIOT's documentation and example code to power LLM-assisted development, code generation, and explanations.
+
 
 ---
 
