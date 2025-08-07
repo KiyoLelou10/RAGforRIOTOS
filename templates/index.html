@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIOT OS RAG Query System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #5855eb;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #475569;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .system-selection {
+            grid-column: 1 / -1;
+        }
+
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .system-option {
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .system-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .system-option:hover::before {
+            left: 100%;
+        }
+
+        .system-option:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+
+        .system-option.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .system-option h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .system-option p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .system-features {
+            list-style: none;
+            margin-top: 0.75rem;
+        }
+
+        .system-features li {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .system-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.875rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .query-section {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+        }
+
+        .query-input-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .query-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .results {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 1.5rem;
+            min-height: 300px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            border: 2px solid var(--border);
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .system-info {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .system-info h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: end;
+        }
+
+        .file-input-group .form-control {
+            flex: 1;
+        }
+
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .file-status.exists {
+            color: var(--success);
+        }
+
+        .file-status.missing {
+            color: var(--error);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timestamp {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-search"></i> RIOT OS RAG Query System</h1>
+            <p>Advanced AI-powered documentation and code search</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- System Selection -->
+            <div class="card system-selection">
+                <h2><i class="fas fa-cog"></i> System Selection</h2>
+                <div class="system-grid">
+                    <div class="system-option active" data-system="standard">
+                        <h3><i class="fas fa-database"></i> Standard RAG</h3>
+                        <p>ChromaDB-based documentation search with advanced reranking</p>
+                        <ul class="system-features">
+                            <li>Advanced semantic search</li>
+                            <li>Hybrid reranking system</li>
+                            <li>Module & category preferences</li>
+                            <li>Configurable chunk retrieval</li>
+                        </ul>
+                    </div>
+                    <div class="system-option" data-system="compressed">
+                        <h3><i class="fas fa-compress"></i> Compressed RAG</h3>
+                        <p>Autoencoder-compressed embeddings for memory efficiency</p>
+                        <ul class="system-features">
+                            <li>Memory-efficient compression</li>
+                            <li>Fast similarity search</li>
+                            <li>768→256 dimension reduction</li>
+                            <li>High semantic quality</li>
+                        </ul>
+                    </div>
+                    <div class="system-option" data-system="combined">
+                        <h3><i class="fas fa-layer-group"></i> Combined RAG</h3>
+                        <p>Unified documentation + examples search system</p>
+                        <ul class="system-features">
+                            <li>Documentation + code examples</li>
+                            <li>Hierarchical result prioritization</li>
+                            <li>Path-based keyword boosting</li>
+                            <li>Theory and practice combined</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="system-info" id="systemInfo">
+                    <h4><i class="fas fa-info-circle"></i> System Information</h4>
+                    <p id="systemInfoContent">Select a system above to see detailed information.</p>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="card">
+                <h2><i class="fas fa-sliders-h"></i> Parameters</h2>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="standard">Standard</button>
+                    <button class="tab" data-tab="compressed">Compressed</button>
+                    <button class="tab" data-tab="combined">Combined</button>
+                </div>
+
+                <!-- Standard RAG Parameters -->
+                <div class="tab-content active" id="standard-params">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-folder"></i> Database Path</label>
+                            <div class="file-input-group">
+                                <input type="text" class="form-control" id="standard-db-path" value="./riot_vector_db">
+                                <button class="btn btn-secondary" onclick="checkFileExists('standard-db-path', 'dir')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="file-status" id="standard-db-path-status"></div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-collection"></i> Collection</label>
+                            <input type="text" class="form-control" id="standard-collection" value="riot_docs">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-brain"></i> Model</label>
+                            <input type="text" class="form-control" id="standard-model" value="sentence-transformers/all-mpnet-base-v2">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-cubes"></i> Chunks</label>
+                            <input type="number" class="form-control" id="standard-chunks" value="8" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-star"></i> Prefer Module (Optional)</label>
+                            <input type="text" class="form-control" id="standard-prefer-module" placeholder="e.g. periph">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Prefer Category (Optional)</label>
+                            <input type="text" class="form-control" id="standard-prefer-category" placeholder="e.g. API">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compressed RAG Parameters -->
+                <div class="tab-content" id="compressed-params">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-file-code"></i> Chunks File</label>
+                            <div class="file-input-group">
+                                <input type="text" class="form-control" id="compressed-chunks-file" value="compressed_chunks.json">
+                                <button class="btn btn-secondary" onclick="checkFileExists('compressed-chunks-file', 'file')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="file-status" id="compressed-chunks-file-status"></div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-robot"></i> Model File</label>
+                            <div class="file-input-group">
+                                <input type="text" class="form-control" id="compressed-model-file" value="autoencoder_model.pth">
+                                <button class="btn btn-secondary" onclick="checkFileExists('compressed-model-file', 'file')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="file-status" id="compressed-model-file-status"></div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-adjust"></i> Scaler File</label>
+                            <div class="file-input-group">
+                                <input type="text" class="form-control" id="compressed-scaler-file" value="embedding_scaler.pkl">
+                                <button class="btn btn-secondary" onclick="checkFileExists('compressed-scaler-file', 'file')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="file-status" id="compressed-scaler-file-status"></div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-brain"></i> Embedding Model</label>
+                            <input type="text" class="form-control" id="compressed-embedding-model" value="sentence-transformers/all-mpnet-base-v2">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-cubes"></i> Chunks</label>
+                            <input type="number" class="form-control" id="compressed-chunks" value="8" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-star"></i> Prefer Module (Optional)</label>
+                            <input type="text" class="form-control" id="compressed-prefer-module" placeholder="e.g. periph">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Prefer Category (Optional)</label>
+                            <input type="text" class="form-control" id="compressed-prefer-category" placeholder="e.g. API">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined RAG Parameters -->
+                <div class="tab-content" id="combined-params">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-folder"></i> Doc DB Path</label>
+                            <div class="file-input-group">
+                                <input type="text" class="form-control" id="combined-doc-db-path" value="./riot_vector_db">
+                                <button class="btn btn-secondary" onclick="checkFileExists('combined-doc-db-path', 'dir')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="file-status" id="combined-doc-db-path-status"></div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-collection"></i> Doc Collection</label>
+                            <input type="text" class="form-control" id="combined-doc-collection" value="riot_docs">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-code"></i> Examples File</label>
+                            <div class="file-input-group">
+                                <input type="text" class="form-control" id="combined-examples-file" value="./riot_examples_embeddings.jsonl">
+                                <button class="btn btn-secondary" onclick="checkFileExists('combined-examples-file', 'file')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="file-status" id="combined-examples-file-status"></div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-brain"></i> Model</label>
+                            <input type="text" class="form-control" id="combined-model" value="sentence-transformers/all-mpnet-base-v2">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-cubes"></i> Doc Chunks</label>
+                            <input type="number" class="form-control" id="combined-doc-chunks" value="8" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-code-branch"></i> Example Chunks</label>
+                            <input type="number" class="form-control" id="combined-example-chunks" value="8" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-star"></i> Prefer Module (Optional)</label>
+                            <input type="text" class="form-control" id="combined-prefer-module" placeholder="e.g. periph">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Prefer Category (Optional)</label>
+                            <input type="text" class="form-control" id="combined-prefer-category" placeholder="e.g. API">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Query Section -->
+            <div class="card query-section">
+                <h2><i class="fas fa-question-circle"></i> Query & Results</h2>
+
+                <div class="query-input-container">
+                    <input type="text" class="query-input" id="queryInput" placeholder="Enter your RIOT OS question here..." onkeypress="if(event.key==='Enter') executeQuery()">
+                    <button class="btn btn-primary" id="executeBtn" onclick="executeQuery()">
+                        <i class="fas fa-play"></i> Execute Query
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadSystemStats()">
+                        <i class="fas fa-chart-bar"></i> Stats
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearResults()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div id="alertContainer"></div>
+
+                <div class="results-header">
+                    <h3><i class="fas fa-terminal"></i> Results</h3>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="saveResults()">
+                            <i class="fas fa-download"></i> Save
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyResults()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div class="results" id="resultsArea">Welcome to RIOT OS RAG Query System!
+
+🚀 Getting Started:
+1. Select your preferred RAG system above
+2. Configure parameters for your chosen system
+3. Enter your query in the input field
+4. Click "Execute Query" to get AI-powered responses
+
+💡 Tips:
+• Try queries like "How to use GPIO in RIOT OS?" or "Show me timer examples"
+• Use the preferences to focus on specific modules or categories
+• Check system stats to see database information
+• Results will appear here with detailed explanations and code examples
+
+Ready to explore RIOT OS with AI assistance!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSystem = 'standard';
+        let isProcessing = false;
+
+        // System information content
+        const systemInfo = {
+            standard: `Standard RAG System (ChromaDB-based)
+
+🔧 Features:
+• Advanced semantic search using ChromaDB vector database
+• Hybrid reranking with similarity, diversity, and preference scoring
+• Support for module and category preferences
+• Configurable chunk retrieval with intelligent diversity promotion
+
+📋 Requirements:
+• ChromaDB database with RIOT OS documentation
+• Sentence transformer model for embeddings
+• Valid collection with pre-indexed documents
+
+✨ Best for: Comprehensive documentation search with advanced filtering`,
+
+            compressed: `Compressed RAG System (Autoencoder-based)
+
+🔧 Features:
+• Memory-efficient compressed embeddings (768→256 dimensions)
+• Trained autoencoder for embedding compression
+• Fast similarity search with reduced memory footprint
+• Maintains high semantic quality with compression
+
+📋 Requirements:
+• Pre-trained autoencoder model (.pth file)
+• Embedding scaler (.pkl file)
+• Compressed chunks JSON file with embeddings
+
+✨ Best for: Large-scale deployment with memory constraints`,
+
+            combined: `Combined RAG System (Documentation + Examples)
+
+🔧 Features:
+• Unified search across documentation and example code
+• Hierarchical result prioritization (docs primary, examples supplementary)
+• Path-based keyword boosting for example relevance
+• Comprehensive context with both theory and practice
+
+📋 Requirements:
+• ChromaDB database for documentation
+• JSONL file with example embeddings
+• Both documentation and example collections
+
+✨ Best for: Complete learning experience with theory and practice`
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateSystemInfo();
+            validateRequiredFiles();
+        });
+
+        function setupEventListeners() {
+            // System selection
+            document.querySelectorAll('.system-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectSystem(this.dataset.system);
+                });
+            });
+
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // File validation on input change
+            const fileInputs = [
+                'standard-db-path', 'compressed-chunks-file', 'compressed-model-file',
+                'compressed-scaler-file', 'combined-doc-db-path', 'combined-examples-file'
+            ];
+
+            fileInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('change', function() {
+                        const type = id.includes('db-path') ? 'dir' : 'file';
+                        checkFileExists(id, type);
+                    });
+                }
+            });
+        }
+
+        function selectSystem(system) {
+            // Update UI
+            document.querySelectorAll('.system-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelector(`.system-option[data-system="${system}"]`).classList.add('active');
+
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${system}"]`).classList.add('active');
+
+            currentSystem = system;
+            switchTab(system);
+            updateSystemInfo();
+        }
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(`${tabName}-params`).classList.add('active');
+
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        function updateSystemInfo() {
+            const infoContent = document.getElementById('systemInfoContent');
+            infoContent.textContent = systemInfo[currentSystem] || 'No information available.';
+        }
+
+        function getCurrentParameters() {
+            const params = {};
+
+            if (currentSystem === 'standard') {
+                params.db_path = document.getElementById('standard-db-path').value;
+                params.collection = document.getElementById('standard-collection').value;
+                params.model = document.getElementById('standard-model').value;
+                params.chunks = parseInt(document.getElementById('standard-chunks').value);
+                params.prefer_module = document.getElementById('standard-prefer-module').value || null;
+                params.prefer_category = document.getElementById('standard-prefer-category').value || null;
+            } else if (currentSystem === 'compressed') {
+                params.chunks_file = document.getElementById('compressed-chunks-file').value;
+                params.model_file = document.getElementById('compressed-model-file').value;
+                params.scaler_file = document.getElementById('compressed-scaler-file').value;
+                params.embedding_model = document.getElementById('compressed-embedding-model').value;
+                params.chunks = parseInt(document.getElementById('compressed-chunks').value);
+                params.prefer_module = document.getElementById('compressed-prefer-module').value || null;
+                params.prefer_category = document.getElementById('compressed-prefer-category').value || null;
+            } else if (currentSystem === 'combined') {
+                params.doc_db_path = document.getElementById('combined-doc-db-path').value;
+                params.doc_collection = document.getElementById('combined-doc-collection').value;
+                params.examples_file = document.getElementById('combined-examples-file').value;
+                params.model = document.getElementById('combined-model').value;
+                params.doc_chunks = parseInt(document.getElementById('combined-doc-chunks').value);
+                params.example_chunks = parseInt(document.getElementById('combined-example-chunks').value);
+                params.prefer_module = document.getElementById('combined-prefer-module').value || null;
+                params.prefer_category = document.getElementById('combined-prefer-category').value || null;
+            }
+
+            return params;
+        }
+
+        async function executeQuery() {
+            if (isProcessing) return;
+
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) {
+                showAlert('Please enter a query.', 'warning');
+                return;
+            }
+
+            setProcessing(true);
+
+            try {
+                const params = getCurrentParameters();
+
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        system_type: currentSystem,
+                        query: query,
+                        parameters: params
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(query, data.result, data.timestamp, data.system_type);
+                    showAlert('Query executed successfully!', 'success');
+                } else {
+                    throw new Error(data.message || 'Query execution failed');
+                }
+
+            } catch (error) {
+                showAlert(`Query failed: ${error.message}`, 'error');
+                console.error('Query error:', error);
+            } finally {
+                setProcessing(false);
+            }
+        }
+
+        async function loadSystemStats() {
+            if (isProcessing) return;
+
+            setProcessing(true);
+
+            try {
+                const params = getCurrentParameters();
+
+                const response = await fetch('/api/system-stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        system_type: currentSystem,
+                        parameters: params
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayStats(data.stats);
+                    showAlert('System statistics loaded!', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to load statistics');
+                }
+
+            } catch (error) {
+                showAlert(`Stats failed: ${error.message}`, 'error');
+                console.error('Stats error:', error);
+            } finally {
+                setProcessing(false);
+            }
+        }
+
+        async function checkFileExists(inputId, type) {
+            const input = document.getElementById(inputId);
+            const statusDiv = document.getElementById(`${inputId}-status`);
+            const filepath = input.value;
+
+            if (!filepath) {
+                statusDiv.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/check-file-exists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ filepath })
+                });
+
+                const data = await response.json();
+
+                if (data.exists) {
+                    statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${type === 'dir' ? 'Directory' : 'File'} exists`;
+                    statusDiv.className = 'file-status exists';
+                } else {
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${type === 'dir' ? 'Directory' : 'File'} not found`;
+                    statusDiv.className = 'file-status missing';
+                }
+
+            } catch (error) {
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error checking ${type}`;
+                statusDiv.className = 'file-status missing';
+            }
+        }
+
+        async function validateRequiredFiles() {
+            try {
+                const response = await fetch('/api/validate-files', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!data.valid) {
+                    const missingFiles = data.missing_files.join(', ');
+                    showAlert(`Missing required files: ${missingFiles}`, 'error');
+                }
+
+            } catch (error) {
+                showAlert('Failed to validate system files', 'error');
+            }
+        }
+
+        function setProcessing(processing) {
+            isProcessing = processing;
+            const executeBtn = document.getElementById('executeBtn');
+            const progressBar = document.getElementById('progressBar');
+
+            if (processing) {
+                executeBtn.disabled = true;
+                executeBtn.innerHTML = '<div class="loading"><div class="spinner"></div> Processing...</div>';
+                progressBar.style.display = 'block';
+            } else {
+                executeBtn.disabled = false;
+                executeBtn.innerHTML = '<i class="fas fa-play"></i> Execute Query';
+                progressBar.style.display = 'none';
+            }
+        }
+
+        function displayResults(query, result, timestamp, systemType) {
+            const resultsArea = document.getElementById('resultsArea');
+            const header = `${'='.repeat(80)}\nQuery executed at ${new Date(timestamp).toLocaleString()}\nSystem: ${systemType.charAt(0).toUpperCase() + systemType.slice(1)} RAG\nQuery: ${query}\n${'='.repeat(80)}\n\n`;
+
+            const existingContent = resultsArea.textContent;
+            const newContent = (existingContent.includes('Welcome to RIOT OS') ? '' : existingContent + '\n\n') + header + result;
+
+            resultsArea.textContent = newContent;
+            resultsArea.scrollTop = resultsArea.scrollHeight;
+        }
+
+        function displayStats(stats) {
+            const resultsArea = document.getElementById('resultsArea');
+            const header = `${'='.repeat(60)}\nSystem Statistics - ${currentSystem.charAt(0).toUpperCase() + currentSystem.slice(1)} RAG\n${'='.repeat(60)}\n\n`;
+
+            let statsText = header;
+            for (const [key, value] of Object.entries(stats)) {
+                statsText += `${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: ${value}\n`;
+            }
+
+            const existingContent = resultsArea.textContent;
+            const newContent = (existingContent.includes('Welcome to RIOT OS') ? '' : existingContent + '\n\n') + statsText;
+
+            resultsArea.textContent = newContent;
+            resultsArea.scrollTop = resultsArea.scrollHeight;
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'error' ? 'exclamation-circle' : 'exclamation-triangle';
+
+            alertDiv.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+
+            alertContainer.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function clearResults() {
+            if (confirm('Are you sure you want to clear all results?')) {
+                document.getElementById('resultsArea').textContent = 'Results cleared. Ready for new queries!';
+            }
+        }
+
+        function saveResults() {
+            const content = document.getElementById('resultsArea').textContent;
+            if (!content || content.includes('Welcome to RIOT OS')) {
+                showAlert('No results to save.', 'warning');
+                return;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `riot-rag-results-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showAlert('Results saved successfully!', 'success');
+        }
+
+        function copyResults() {
+            const content = document.getElementById('resultsArea').textContent;
+            if (!content || content.includes('Welcome to RIOT OS')) {
+                showAlert('No results to copy.', 'warning');
+                return;
+            }
+
+            navigator.clipboard.writeText(content).then(() => {
+                showAlert('Results copied to clipboard!', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy results.', 'error');
+            });
+        }
+    </script>
+</body>
+</html>
