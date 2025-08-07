@@ -152,6 +152,10 @@ If you saved all python files in one common directory (like in this repository),
  ```bash
    python3 RAGSystemGUI.py
    ```
-
-
+Alternatively you can also use the more good looking GUI, 
+First run
+ ```bash
+   python3 RAGGUIServer.py
+   ```
+Then go to http://127.0.0.1:5000/ here you should now see the website version of the GUI
 
