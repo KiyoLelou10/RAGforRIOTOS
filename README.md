@@ -147,7 +147,11 @@ If you saved all python files in one common directory (different from the stuctu
  ```bash
    python3 RIOTRequestCombined.py "<your query>"
    ```
-
+## GUI
+If you saved all python files in one common directory (different from the stucture of this repository), you can try to run the python GUI, here you can easily choose which RAG you want to use specify your query and also specify parameters
+ ```bash
+   python3 RAGSystemGUI.py
+   ```
 
 ## License
 
