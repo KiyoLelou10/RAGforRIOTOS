@@ -16,8 +16,7 @@ A Retrieval-Augmented Generation (RAG) toolchain for the RIOT operating system. 
 3. [Autoencoder (Optional)](#autoencoder-optional)
 4. [Code RAG (Examples Directory)](#code-rag-examples-directory)
 5. [Combining the RAGS](#Best-of-two-worlds)
-6. [Ease of usw](#GUI)
-7. [License](#license)
+6. [Ease of use](#GUI)
 
 ---
 
@@ -153,14 +152,6 @@ If you saved all python files in one common directory (different from the stuctu
  ```bash
    python3 RAGSystemGUI.py
    ```
-
-## License
-
-This project is licensed under the [MIT License](./LICENSE).
-
-
-
-:
 
 
 
