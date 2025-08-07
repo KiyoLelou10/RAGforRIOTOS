@@ -28,7 +28,7 @@ A Retrieval-Augmented Generation (RAG) toolchain for the [RIOT operating system]
 * Required pip packages:
 
   ```bash
-  pip install all required packaged please 
+  pip install chromadb sentence-transformers torch numpy tqdm scikit-learn flask flask-cors beautifulsoup4 tiktoken langchain
   ```
 
 ---
