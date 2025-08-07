@@ -16,7 +16,8 @@ A Retrieval-Augmented Generation (RAG) toolchain for the RIOT operating system. 
 3. [Autoencoder (Optional)](#autoencoder-optional)
 4. [Code RAG (Examples Directory)](#code-rag-examples-directory)
 5. [Combining the RAGS](#Best-of-two-worlds)
-6. [License](#license)
+6. [Ease of usw](#GUI)
+7. [License](#license)
 
 ---
 
